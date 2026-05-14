@@ -25,3 +25,6 @@ dist-ssr
 
 # instant-grep index
 .ig/
+
+# Local data (auction-house history, sqlite db, token history)
+.data/
