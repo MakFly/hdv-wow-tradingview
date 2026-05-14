@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun .claude/skills/wow-market-analyst/scripts/analyze.ts:*)",
+      "Read(.data/**)",
+      "Read(.claude/skills/wow-market-analyst/**)"
+    ]
+  }
+}

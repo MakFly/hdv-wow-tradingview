@@ -1,0 +1,114 @@
+{
+  "app": {
+    "subtitle": "Économie WoW · API officielle Blizzard · push SSE",
+    "conn": {
+      "oauthMissing": "OAUTH ABSENT",
+      "live": "EN DIRECT · SSE",
+      "reconnecting": "RECONNEXION…"
+    },
+    "selectRealm": "choisir un royaume",
+    "loadingRealms": "chargement des royaumes…",
+    "searchRealm": "rechercher un royaume…",
+    "noRealm": "aucun royaume trouvé",
+    "realmBadge": "CR#{{id}} · {{status}} · pop {{population}}",
+    "reloadRealms": "recharger les royaumes",
+    "ahNextCheck": "HV check dans {{remaining}}",
+    "ahLastCheck": "dernier check il y a {{age}}",
+    "pickItem": "Choisis un objet dans la watchlist pour tracer son marché.",
+    "noSnapshots": "Aucun relevé pour cet objet pour l'instant.",
+    "noSnapshotsHint": "Le proxy interroge l'HV toutes les ~{{min}} min et pousse la première bougie via SSE.",
+    "waitingToken": "en attente du premier tick du jeton…",
+    "connectingStream": "connexion au flux…",
+    "footer": {
+      "source": "source : Blizzard Battle.net Game Data API · OAuth client_credentials · push SSE · jeton {{tokenSec}}s · HV {{ahMin}} min",
+      "authMissing": "auth : absente · voir .env.example",
+      "streamConnected": "flux : connecté · localhost:8788",
+      "streamReconnecting": "flux : reconnexion…"
+    }
+  },
+  "cards": {
+    "watchlist": "Watchlist",
+    "market": "Hôtel des ventes · {{realm}}",
+    "marketStats": "Stats marché · 24h",
+    "topMovers": "Top mouvements · depuis le dernier scan",
+    "wowToken": "Jeton WoW · {{region}}"
+  },
+  "market": {
+    "filterPlaceholder": "filtrer par nom ou #id",
+    "count": "{{n}} / {{all}} objets",
+    "empty": "aucune donnée HV · attends le prochain scan",
+    "watch": "suivre dans la watchlist",
+    "unwatch": "retirer de la watchlist",
+    "col": {
+      "item": "Objet",
+      "min": "Min",
+      "median": "Médiane",
+      "lots": "Lots",
+      "stock": "Stock"
+    }
+  },
+  "chart": {
+    "priceMin": "Prix min",
+    "median": "Médiane",
+    "spread": "Spread",
+    "stock": "Stock",
+    "listings": "Annonces",
+    "lastScan": "Dernier scan",
+    "medianShort": "Méd",
+    "spreadShort": "Spr",
+    "stockShort": "Stock",
+    "listingsShort": "Lots",
+    "ohlc": {
+      "open": "O",
+      "high": "H",
+      "low": "B",
+      "close": "C"
+    },
+    "legend": {
+      "priceGold": "Prix min (gold)",
+      "medianGold": "Médiane (gold)",
+      "median": "Médiane",
+      "ma7": "MA7",
+      "ma20": "MA20",
+      "stock": "Barres stock",
+      "stockUnits": "Stock (x unités)"
+    },
+    "controls": {
+      "reset": "Réinitialiser la vue",
+      "latest": "Aller à la dernière bougie"
+    }
+  },
+  "ticker": {
+    "loading": "chargement des jetons…",
+    "label": "JETON {{region}}"
+  },
+  "watchlist": {
+    "searchPlaceholder": "rechercher un objet (ex. resilient)",
+    "searching": "recherche…",
+    "empty": "Recherche ci-dessus, ou ★ un objet dans la table de l'Hôtel des ventes pour le suivre.",
+    "lots": "{{n}} lots"
+  },
+  "movers": {
+    "gainers": "▲ PLUS FORTES HAUSSES",
+    "losers": "▼ PLUS FORTES BAISSES",
+    "waiting": "en attente de 2 relevés…"
+  },
+  "stats": {
+    "empty": "aucun relevé · attends le prochain scan HV",
+    "open24": "Ouv. 24h",
+    "high24": "Haut 24h",
+    "low24": "Bas 24h",
+    "delta24": "Δ 24h",
+    "listings": "Annonces",
+    "stock": "Stock",
+    "stock24": "Stock Δ 24h",
+    "median": "Médiane",
+    "spread": "Spread",
+    "vendor": "Vendeur"
+  },
+  "lang": {
+    "label": "Langue",
+    "en": "English",
+    "fr": "Français"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "app": {
+    "subtitle": "WoW economy · official Blizzard API · SSE push",
+    "conn": {
+      "oauthMissing": "OAUTH MISSING",
+      "live": "LIVE · SSE",
+      "reconnecting": "RECONNECTING…"
+    },
+    "selectRealm": "select realm",
+    "loadingRealms": "loading realms…",
+    "searchRealm": "search realm…",
+    "noRealm": "no realm found",
+    "realmBadge": "CR#{{id}} · {{status}} · pop {{population}}",
+    "reloadRealms": "reload realms",
+    "ahNextCheck": "AH check in {{remaining}}",
+    "ahLastCheck": "last check {{age}} ago",
+    "pickItem": "Pick an item from the watchlist to plot its market.",
+    "noSnapshots": "No snapshots yet for this item.",
+    "noSnapshotsHint": "The proxy polls the AH every ~{{min}} min and pushes the first candle over SSE.",
+    "waitingToken": "waiting for first token tick…",
+    "connectingStream": "connecting to stream…",
+    "footer": {
+      "source": "source: Blizzard Battle.net Game Data API · OAuth client_credentials · SSE push · token poll {{tokenSec}}s · AH poll {{ahMin}} min",
+      "authMissing": "auth: missing · see .env.example",
+      "streamConnected": "stream: connected · localhost:8788",
+      "streamReconnecting": "stream: reconnecting…"
+    }
+  },
+  "cards": {
+    "watchlist": "Watchlist",
+    "market": "Auction House · {{realm}}",
+    "marketStats": "Market Stats · 24h",
+    "topMovers": "Top Movers · since last scan",
+    "wowToken": "WoW Token · {{region}}"
+  },
+  "market": {
+    "filterPlaceholder": "filter by name or #id",
+    "count": "{{n}} / {{all}} items",
+    "empty": "no auction data yet · wait for the next AH poll",
+    "watch": "track in watchlist",
+    "unwatch": "remove from watchlist",
+    "col": {
+      "item": "Item",
+      "min": "Min",
+      "median": "Median",
+      "lots": "Lots",
+      "stock": "Stock"
+    }
+  },
+  "chart": {
+    "priceMin": "Lowest buyout",
+    "median": "Median",
+    "spread": "Spread",
+    "stock": "Stock",
+    "listings": "Listings",
+    "lastScan": "Last scan",
+    "medianShort": "Med",
+    "spreadShort": "Spr",
+    "stockShort": "Stock",
+    "listingsShort": "Lots",
+    "ohlc": {
+      "open": "O",
+      "high": "H",
+      "low": "L",
+      "close": "C"
+    },
+    "legend": {
+      "priceGold": "Lowest (gold)",
+      "medianGold": "Median (gold)",
+      "median": "Median",
+      "ma7": "MA7",
+      "ma20": "MA20",
+      "stock": "Stock bars",
+      "stockUnits": "Stock (x units)"
+    },
+    "controls": {
+      "reset": "Reset chart view",
+      "latest": "Jump to latest candle"
+    }
+  },
+  "ticker": {
+    "loading": "loading tokens…",
+    "label": "TOKEN {{region}}"
+  },
+  "watchlist": {
+    "searchPlaceholder": "search item (e.g. resilient)",
+    "searching": "searching…",
+    "empty": "Search above, or ★ an item in the Auction House table to track it.",
+    "lots": "{{n}} lots"
+  },
+  "movers": {
+    "gainers": "▲ TOP GAINERS",
+    "losers": "▼ TOP LOSERS",
+    "waiting": "waiting for 2 snapshots…"
+  },
+  "stats": {
+    "empty": "no snapshots yet · wait for next AH poll",
+    "open24": "Open 24h",
+    "high24": "High 24h",
+    "low24": "Low 24h",
+    "delta24": "Δ 24h",
+    "listings": "Listings",
+    "stock": "Stock",
+    "stock24": "Stock Δ 24h",
+    "median": "Median",
+    "spread": "Spread",
+    "vendor": "Vendor"
+  },
+  "lang": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  }
+}
