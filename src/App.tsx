@@ -20,6 +20,7 @@ import { MoversCard } from "@/components/MoversCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { RealmCombobox } from "@/components/RealmCombobox";
 import { ProfileView } from "@/components/ProfileView";
+import { OpportunitiesView } from "@/components/OpportunitiesView";
 import { ChartErrorBoundary } from "@/components/ChartErrorBoundary";
 import { ListSkeleton, TableSkeleton, ChartSkeleton, StatsSkeleton } from "@/components/Skeletons";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -656,19 +657,7 @@ export function App() {
        ) : activeView === "profile" ? (
          <ProfileView />
        ) : activeView === "opportunities" ? (
-         <div className="flex h-full items-center justify-center">
-           <Card className="w-full max-w-2xl">
-             <CardHeader>
-               <CardTitle>Opportunités</CardTitle>
-             </CardHeader>
-             <CardContent>
-               <p className="text-muted-foreground text-sm">
-                 Crafts rentables, flips AH, alertes de seuil.
-                 <br />Bientôt disponible.
-               </p>
-             </CardContent>
-           </Card>
-         </div>
+         <OpportunitiesView />
        ) : (
          <div className="flex h-full items-center justify-center">
            <Card className="w-full max-w-2xl">
