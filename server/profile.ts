@@ -4,6 +4,37 @@ import { getUserToken } from "./auth"
 
 type Region = "us" | "eu" | "kr" | "tw"
 
+const CLIENT_ID = process.env.BNET_CLIENT_ID ?? ""
+const CLIENT_SECRET = process.env.BNET_CLIENT_SECRET ?? ""
+
+let staticToken = ""
+let staticTokenExp = 0
+
+async function getStaticToken(): Promise<string> {
+  if (Date.now() < staticTokenExp - 60_000 && staticToken) return staticToken
+  const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64")
+  const res = await fetch("https://oauth.battle.net/token", {
+    method: "POST",
+    headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=client_credentials",
+  })
+  if (!res.ok) throw new Error(`static oauth failed: ${res.status}`)
+  const j = (await res.json()) as { access_token: string; expires_in: number }
+  staticToken = j.access_token
+  staticTokenExp = Date.now() + j.expires_in * 1000
+  return staticToken
+}
+
+async function staticFetch(region: Region, path: string): Promise<unknown> {
+  const token = await getStaticToken()
+  const url = new URL(`https://${region}.api.blizzard.com${path}`)
+  url.searchParams.set("namespace", `static-${region}`)
+  url.searchParams.set("locale", "fr_FR")
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) return null
+  return res.json()
+}
+
 async function profileFetch(token: string, region: Region, path: string, namespace = "profile") {
   const url = new URL(`https://${region}.api.blizzard.com${path}`)
   url.searchParams.set("namespace", `${namespace}-${region}`)
@@ -92,42 +123,70 @@ export function createProfileRoutes(db: Database) {
       primaries?: Array<{
         profession: { name: string; id: number }
         tiers?: Array<{
-          tier: { name: string }
+          tier: { id: number; name: string }
           known_recipes?: Array<{ id: number; name: string }>
         }>
       }>
       secondaries?: Array<{
         profession: { name: string; id: number }
         tiers?: Array<{
-          tier: { name: string }
+          tier: { id: number; name: string }
           known_recipes?: Array<{ id: number; name: string }>
         }>
       }>
     }
 
-    const primaries = (data.primaries ?? []).map((p) => ({
-      name: p.profession.name,
-      id: p.profession.id,
-      recipes: (p.tiers ?? []).flatMap((t) =>
-        (t.known_recipes ?? []).map((r) => ({
-          id: r.id,
-          name: r.name,
-          tier: t.tier.name,
-        }))
-      ),
-    }))
+    type SkillTierFR = {
+      id: number
+      name: string
+      recipes?: Array<{ id: number; name: string }>
+    }
 
-    const secondaries = (data.secondaries ?? []).map((p) => ({
-      name: p.profession.name,
-      id: p.profession.id,
-      recipes: (p.tiers ?? []).flatMap((t) =>
-        (t.known_recipes ?? []).map((r) => ({
-          id: r.id,
-          name: r.name,
-          tier: t.tier.name,
-        }))
-      ),
-    }))
+    async function getLocalizedProfession(profId: number, tiers: Array<{ tier: { id: number; name: string }; known_recipes?: Array<{ id: number; name: string }> }>) {
+      const frTierNames = new Map<number, string>()
+      const frRecipeNames = new Map<number, string>()
+
+      const profDetail = (await staticFetch(region, `/data/wow/profession/${profId}`)) as {
+        name?: string
+        skill_tiers?: Array<{ id: number; name: string; key: { href: string } }>
+      } | null
+
+      const profNameFR = profDetail?.name ?? null
+
+      for (const tier of tiers) {
+        const tierData = (await staticFetch(region, `/data/wow/profession/${profId}/skill-tier/${tier.tier.id}`)) as SkillTierFR | null
+        if (tierData) {
+          frTierNames.set(tier.tier.id, tierData.name)
+          if (tierData.recipes) {
+            for (const r of tierData.recipes) {
+              frRecipeNames.set(r.id, r.name)
+            }
+          }
+        }
+      }
+
+      return { profNameFR, frTierNames, frRecipeNames }
+    }
+
+    async function mapProfession(p: { profession: { name: string; id: number }; tiers?: Array<{ tier: { id: number; name: string }; known_recipes?: Array<{ id: number; name: string }> }> }) {
+      const tiers = p.tiers ?? []
+      const { profNameFR, frTierNames, frRecipeNames } = await getLocalizedProfession(p.profession.id, tiers)
+
+      return {
+        name: profNameFR ?? p.profession.name,
+        id: p.profession.id,
+        recipes: tiers.flatMap((t) =>
+          (t.known_recipes ?? []).map((r) => ({
+            id: r.id,
+            name: frRecipeNames.get(r.id) ?? r.name,
+            tier: frTierNames.get(t.tier.id) ?? t.tier.name,
+          }))
+        ),
+      }
+    }
+
+    const primaries = await Promise.all((data.primaries ?? []).map(mapProfession))
+    const secondaries = await Promise.all((data.secondaries ?? []).map(mapProfession))
 
     return c.json({ primaries, secondaries })
   })
