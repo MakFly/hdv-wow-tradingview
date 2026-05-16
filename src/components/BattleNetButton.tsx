@@ -9,7 +9,7 @@ import {
 } from "./ui/dropdown-menu"
 import { LogOut, User, Swords } from "lucide-react"
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8788"
+const API = import.meta.env.VITE_API_URL || ""
 
 type AuthStatus = {
   linked: boolean

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8788"
+const API = import.meta.env.VITE_API_URL || ""
 
 export type AuthStatus = {
   linked: boolean
@@ -12,6 +13,8 @@ export type AuthStatus = {
 export function useAuth() {
   const [status, setStatus] = useState<AuthStatus | null>(null)
   const [loading, setLoading] = useState(true)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const refresh = useCallback(async () => {
     try {
@@ -30,11 +33,11 @@ export function useAuth() {
   }, [refresh])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+    const params = new URLSearchParams(location.search)
     const code = params.get("code")
     if (!code) return
 
-    window.history.replaceState({}, "", window.location.pathname)
+    navigate("/", { replace: true })
 
     ;(async () => {
       try {
@@ -48,7 +51,7 @@ export function useAuth() {
         // exchange failed
       }
     })()
-  }, [refresh])
+  }, [location.search, navigate, refresh])
 
   return { status, loading, refresh }
 }

@@ -1,4 +1,5 @@
 import { Hono } from "hono"
+import { cors } from "hono/cors"
 import {
   type ItemSnapshot,
   type Region,
@@ -591,6 +592,8 @@ if (CLIENT_ID && CLIENT_SECRET) {
 // --------------------------- HTTP server ----------------------------------
 
 const app = new Hono()
+
+app.use("*", cors({ origin: "*", allowMethods: ["GET", "POST", "OPTIONS"], allowHeaders: ["Content-Type", "Authorization"] }))
 
 // --- Profile OAuth + routes ---
 const rawDb = storage.getDatabase()

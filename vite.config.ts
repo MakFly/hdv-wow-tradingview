@@ -14,6 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": { target: "http://localhost:8788", changeOrigin: true },
+      "/auth": { target: "http://localhost:8788", changeOrigin: true },
     },
     // The API process persists rolling history into .data/ inside this root;
     // ignore it so those writes don't trigger dev-server full reloads.

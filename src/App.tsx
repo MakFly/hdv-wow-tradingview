@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
 import { useTranslation } from "react-i18next";
 import { Activity, Server, RefreshCcw } from "lucide-react";
-import { AppNav, type AppView } from "@/components/AppNav";
+import { AppNav, useActiveView } from "@/components/AppNav";
 import { BattleNetButton } from "@/components/BattleNetButton";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -203,7 +203,7 @@ export function App() {
   const initialRegion = useMemo(() => loadRegionFromUrl(), []);
   const [region, setRegion] = useState<Region>(initialRegion);
   const [crId, setCrId] = useState<number | null>(() => loadCrIdFromUrl(initialRegion));
-  const [activeView, setActiveView] = useState<AppView>("dashboard");
+  const activeView = useActiveView();
   const auth = useAuth();
   const [tf, setTf] = useState<Tf>(loadTf);
   const [selected, setSelected] = useState<{ id: number; name: string } | null>(loadSelectedFromUrl);
@@ -374,27 +374,27 @@ export function App() {
   return (
     <div className="bg-background text-foreground flex h-screen flex-col font-sans">
       <header className="border-b">
-        <div className="flex items-center gap-4 px-4 py-2">
+        <div className="flex items-center gap-2 px-3 py-2 sm:gap-4 sm:px-4">
           <div className="flex items-center gap-2">
-            <div className="text-2xl text-amber-400">⚔</div>
+            <div className="text-xl text-amber-400 sm:text-2xl">⚔</div>
             <div>
-              <div className="text-sm font-bold tracking-[0.2em]">AZEROTH TERMINAL</div>
-              <div className="text-muted-foreground text-[10px] tracking-widest uppercase">
+              <div className="text-xs font-bold tracking-[0.2em] sm:text-sm">AZEROTH TERMINAL</div>
+              <div className="text-muted-foreground hidden text-[10px] tracking-widest uppercase sm:block">
                 {t("app.subtitle")}
               </div>
             </div>
           </div>
-          <Separator orientation="vertical" className="!h-8" />
+          <Separator orientation="vertical" className="hidden !h-8 sm:block" />
           <AppNav
-            active={activeView}
-            onChange={setActiveView}
             disabled={auth.status?.linked ? [] : ["profile", "opportunities"]}
           />
-          <div className="ml-auto flex items-center gap-3">
-            <TokenTicker data={tokens} />
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <div className="hidden lg:block">
+              <TokenTicker data={tokens} />
+            </div>
             <Badge
               variant={conn.variant}
-              className={conn.cls}
+              className={`hidden sm:inline-flex ${conn.cls}`}
             >
               <Activity className={`mr-1 h-3 w-3 ${live && stream.connected ? "animate-pulse" : ""}`} />
               {conn.label}
@@ -403,7 +403,7 @@ export function App() {
               <span>{localClock}</span>
               <span title={userTimeZone}>{userTimeZone}</span>
             </div>
-            <div className="text-muted-foreground hidden flex-col items-end font-mono text-[10px] leading-tight lg:flex">
+            <div className="text-muted-foreground hidden flex-col items-end font-mono text-[10px] leading-tight xl:flex">
               <span>{t("app.ahNextCheck", { remaining: fmtDuration(ahNextCheckIn) })}</span>
               <span>{t("app.ahLastCheck", { age: lastAhCheckAt ? fmtDuration(now.getTime() - lastAhCheckAt) : "—" })}</span>
             </div>
