@@ -19,6 +19,7 @@ import { MarketStats } from "@/components/MarketStats";
 import { MoversCard } from "@/components/MoversCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { RealmCombobox } from "@/components/RealmCombobox";
+import { ProfileView } from "@/components/ProfileView";
 import { ChartErrorBoundary } from "@/components/ChartErrorBoundary";
 import { ListSkeleton, TableSkeleton, ChartSkeleton, StatsSkeleton } from "@/components/Skeletons";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -257,6 +258,7 @@ export function App() {
     [selected, itemDetail.data?.name]
   );
   useEffect(() => {
+    if (activeView !== "dashboard") return;
     const q = new URLSearchParams(window.location.search);
     q.set("region", region);
     if (crId != null) {
@@ -272,9 +274,9 @@ export function App() {
       q.delete("itemName");
     }
     const suffix = q.toString();
-    const next = suffix ? `${window.location.pathname}?${suffix}` : window.location.pathname;
+    const next = suffix ? `/?${suffix}` : "/";
     window.history.replaceState({}, "", next);
-  }, [region, crId, selected?.id, selected?.name, selectedDisplayName]);
+  }, [region, crId, selected?.id, selected?.name, selectedDisplayName, activeView]);
 
   useEffect(() => {
     const list = realms.data;
@@ -411,19 +413,18 @@ export function App() {
             <LanguageSwitcher />
           </div>
         </div>
-        <div className="bg-card/40 flex items-center gap-3 border-t px-4 py-2 text-xs">
-          <Server className="text-muted-foreground h-3.5 w-3.5" />
+        {activeView === "dashboard" && (
+        <div className="bg-card/40 flex items-center gap-2 border-t px-3 py-2 text-xs sm:gap-3 sm:px-4">
+          <Server className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
           <Select
             value={region}
             onValueChange={v => {
               const r = v as Region;
               setRegion(r);
-              // a realm id is region-scoped — restore the one last used for this region
-              // (or null, which lets the auto-pick choose one)
               setCrId(loadCrId(r));
             }}
           >
-            <SelectTrigger className="h-7 w-[90px] text-xs">
+            <SelectTrigger className="h-7 w-[70px] text-xs sm:w-[90px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -435,7 +436,7 @@ export function App() {
           </Select>
           <RealmCombobox realms={realms.data} value={crId} onChange={setCrId} />
           {realm && (
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="hidden font-mono text-[10px] sm:inline-flex">
               {t("app.realmBadge", { id: realm.id, status: realm.status, population: realm.population })}
             </Badge>
           )}
@@ -448,9 +449,10 @@ export function App() {
               itemDetail.refresh();
             }}
           >
-            <RefreshCcw className="mr-1 h-3 w-3" /> {t("app.reloadRealms")}
+            <RefreshCcw className="mr-1 h-3 w-3" /> <span className="hidden sm:inline">{t("app.reloadRealms")}</span>
           </Button>
         </div>
+        )}
       </header>
 
       <main className="min-h-0 flex-1 p-2">
@@ -652,24 +654,7 @@ export function App() {
         </ResizablePanel>
        </ResizablePanelGroup>
        ) : activeView === "profile" ? (
-         <div className="flex h-full items-center justify-center">
-           <Card className="w-full max-w-2xl">
-             <CardHeader>
-               <CardTitle className="flex items-center gap-2">
-                 Profil
-                 {auth.status?.battletag && (
-                   <Badge variant="outline">{auth.status.battletag}</Badge>
-                 )}
-               </CardTitle>
-             </CardHeader>
-             <CardContent>
-               <p className="text-muted-foreground text-sm">
-                 Personnages, professions et recettes connues.
-                 <br />Bientôt disponible.
-               </p>
-             </CardContent>
-           </Card>
-         </div>
+         <ProfileView />
        ) : activeView === "opportunities" ? (
          <div className="flex h-full items-center justify-center">
            <Card className="w-full max-w-2xl">
