@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
 import { useTranslation } from "react-i18next";
 import { Activity, Server, RefreshCcw } from "lucide-react";
+import { AppNav, type AppView } from "@/components/AppNav";
+import { BattleNetButton } from "@/components/BattleNetButton";
+import { useAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -200,6 +203,8 @@ export function App() {
   const initialRegion = useMemo(() => loadRegionFromUrl(), []);
   const [region, setRegion] = useState<Region>(initialRegion);
   const [crId, setCrId] = useState<number | null>(() => loadCrIdFromUrl(initialRegion));
+  const [activeView, setActiveView] = useState<AppView>("dashboard");
+  const auth = useAuth();
   const [tf, setTf] = useState<Tf>(loadTf);
   const [selected, setSelected] = useState<{ id: number; name: string } | null>(loadSelectedFromUrl);
   const [watch, setWatchState] = useState<WatchItem[]>(loadWatch);
@@ -380,8 +385,13 @@ export function App() {
             </div>
           </div>
           <Separator orientation="vertical" className="!h-8" />
-          <TokenTicker data={tokens} />
+          <AppNav
+            active={activeView}
+            onChange={setActiveView}
+            disabled={auth.status?.linked ? [] : ["profile", "opportunities"]}
+          />
           <div className="ml-auto flex items-center gap-3">
+            <TokenTicker data={tokens} />
             <Badge
               variant={conn.variant}
               className={conn.cls}
@@ -397,6 +407,7 @@ export function App() {
               <span>{t("app.ahNextCheck", { remaining: fmtDuration(ahNextCheckIn) })}</span>
               <span>{t("app.ahLastCheck", { age: lastAhCheckAt ? fmtDuration(now.getTime() - lastAhCheckAt) : "—" })}</span>
             </div>
+            <BattleNetButton status={auth.status} onStatusChange={auth.refresh} />
             <LanguageSwitcher />
           </div>
         </div>
@@ -443,6 +454,7 @@ export function App() {
       </header>
 
       <main className="min-h-0 flex-1 p-2">
+       {activeView === "dashboard" ? (
        <ResizablePanelGroup ref={rowGroup} direction="vertical" autoSaveId="azeroth:layout:rows" className="gap-2">
         {/* ---- TOP REGION: the 3 resizable columns ---- */}
         <ResizablePanel defaultSize={ROW_LAYOUT[0]} minSize={35}>
@@ -639,6 +651,54 @@ export function App() {
         </Card>
         </ResizablePanel>
        </ResizablePanelGroup>
+       ) : activeView === "profile" ? (
+         <div className="flex h-full items-center justify-center">
+           <Card className="w-full max-w-2xl">
+             <CardHeader>
+               <CardTitle className="flex items-center gap-2">
+                 Profil
+                 {auth.status?.battletag && (
+                   <Badge variant="outline">{auth.status.battletag}</Badge>
+                 )}
+               </CardTitle>
+             </CardHeader>
+             <CardContent>
+               <p className="text-muted-foreground text-sm">
+                 Personnages, professions et recettes connues.
+                 <br />Bientôt disponible.
+               </p>
+             </CardContent>
+           </Card>
+         </div>
+       ) : activeView === "opportunities" ? (
+         <div className="flex h-full items-center justify-center">
+           <Card className="w-full max-w-2xl">
+             <CardHeader>
+               <CardTitle>Opportunités</CardTitle>
+             </CardHeader>
+             <CardContent>
+               <p className="text-muted-foreground text-sm">
+                 Crafts rentables, flips AH, alertes de seuil.
+                 <br />Bientôt disponible.
+               </p>
+             </CardContent>
+           </Card>
+         </div>
+       ) : (
+         <div className="flex h-full items-center justify-center">
+           <Card className="w-full max-w-2xl">
+             <CardHeader>
+               <CardTitle>Encyclopédie</CardTitle>
+             </CardHeader>
+             <CardContent>
+               <p className="text-muted-foreground text-sm">
+                 Recherche dans la base de connaissances WoW (classes, talents, donjons, guides FR).
+                 <br />Bientôt disponible.
+               </p>
+             </CardContent>
+           </Card>
+         </div>
+       )}
       </main>
 
       <footer className="text-muted-foreground flex items-center justify-between border-t px-4 py-1 font-mono text-[10px]">
