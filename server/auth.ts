@@ -4,6 +4,7 @@ import { Database } from "bun:sqlite"
 const CLIENT_ID = process.env.BNET_CLIENT_ID ?? ""
 const CLIENT_SECRET = process.env.BNET_CLIENT_SECRET ?? ""
 const REDIRECT_URI = "http://localhost:8788/auth/callback"
+const FRONTEND_URL = "http://localhost:5173"
 const SCOPES = "wow.profile"
 
 type UserToken = {
@@ -16,7 +17,6 @@ type UserToken = {
 let cachedToken: UserToken | null = null
 
 export function initAuthSchema(db: Database) {
-  db.exec(`DROP TABLE IF EXISTS user_tokens`)
   db.exec(`
     CREATE TABLE IF NOT EXISTS user_tokens (
       id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -100,7 +100,7 @@ export async function getUserToken(db: Database): Promise<string | null> {
 export function createAuthRoutes(db: Database) {
   const auth = new Hono()
 
-  auth.get("/login", (c) => {
+  auth.get("/url", (c) => {
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
       redirect_uri: REDIRECT_URI,
@@ -108,11 +108,20 @@ export function createAuthRoutes(db: Database) {
       scope: SCOPES,
       state: crypto.randomUUID(),
     })
-    return c.redirect(`https://oauth.battle.net/authorize?${params}`)
+    return c.json({ url: `https://oauth.battle.net/authorize?${params}` })
   })
 
-  auth.get("/callback", async (c) => {
-    const code = c.req.query("code")
+  auth.get("/callback", (c) => {
+    return c.html(`<!DOCTYPE html><html><body><script>
+const code = new URLSearchParams(location.search).get('code');
+if (code) window.location.href = '${FRONTEND_URL}/auth/callback?code=' + code;
+else document.body.textContent = 'Error: no code';
+</script></body></html>`)
+  })
+
+  auth.post("/exchange", async (c) => {
+    const body = await c.req.json<{ code: string }>()
+    const code = body?.code
     if (!code) return c.json({ error: "missing code" }, 400)
 
     const authHeader = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64")
@@ -159,14 +168,7 @@ export function createAuthRoutes(db: Database) {
 
     saveToken(db, token)
 
-    return c.html(`
-      <html><body style="font-family:sans-serif;text-align:center;padding:4rem">
-        <h1>✅ Connecté !</h1>
-        <p>BattleTag: <strong>${token.battletag}</strong></p>
-        <p>Token sauvegardé. Tu peux fermer cette page.</p>
-        <script>setTimeout(()=>window.close(),3000)</script>
-      </body></html>
-    `)
+    return c.json({ ok: true, battletag: token.battletag, expires_at: token.expires_at })
   })
 
   auth.get("/status", (c) => {
