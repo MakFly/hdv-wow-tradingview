@@ -149,18 +149,62 @@ export function createProfileRoutes(db: Database) {
         name: string
         quality: { type: string; name: string }
         level: { value: number }
+        enchantments?: Array<{ display_string: string }>
+        sockets?: Array<{ item?: { name: string }; display_string?: string }>
       }>
     }
 
     return c.json({
       items: (data.equipped_items ?? []).map((i) => ({
+        slot_type: i.slot.type,
         slot: i.slot.name,
         id: i.item.id,
         name: i.name,
-        quality: i.quality.name,
+        quality: i.quality.type,
+        quality_name: i.quality.name,
         ilvl: i.level.value,
+        enchant: i.enchantments?.[0]?.display_string ?? null,
+        gems: i.sockets?.map((s) => s.item?.name ?? s.display_string).filter(Boolean) ?? [],
       })),
     })
+  })
+
+  profile.get("/character/:realm/:name/media", async (c) => {
+    const token = c.get("userToken" as never) as string
+    const region = (c.req.query("region") || "eu") as Region
+    const realm = c.req.param("realm").toLowerCase()
+    const name = c.req.param("name").toLowerCase()
+
+    const data = (await profileFetch(
+      token,
+      region,
+      `/profile/wow/character/${realm}/${name}/character-media`
+    )) as {
+      assets?: Array<{ key: string; value: string }>
+    }
+
+    const render = data.assets?.find((a) => a.key === "main")?.value
+      ?? data.assets?.find((a) => a.key === "main-raw")?.value
+      ?? null
+    const avatar = data.assets?.find((a) => a.key === "avatar")?.value ?? null
+    const inset = data.assets?.find((a) => a.key === "inset")?.value ?? null
+
+    return c.json({ render, avatar, inset })
+  })
+
+  profile.get("/character/:realm/:name/stats", async (c) => {
+    const token = c.get("userToken" as never) as string
+    const region = (c.req.query("region") || "eu") as Region
+    const realm = c.req.param("realm").toLowerCase()
+    const name = c.req.param("name").toLowerCase()
+
+    const data = (await profileFetch(
+      token,
+      region,
+      `/profile/wow/character/${realm}/${name}/statistics`
+    )) as Record<string, unknown>
+
+    return c.json(data)
   })
 
   return profile

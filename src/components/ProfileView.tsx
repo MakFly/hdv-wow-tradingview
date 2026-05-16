@@ -2,7 +2,9 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Badge } from "./ui/badge"
 import { Skeleton } from "./ui/skeleton"
-import { ScrollText } from "lucide-react"
+import { ScrollText, ChevronRight } from "lucide-react"
+import { CharacterSheet } from "./CharacterSheet"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs"
 
 const API = import.meta.env.VITE_API_URL || ""
 
@@ -33,6 +35,7 @@ export function ProfileView() {
   const [professions, setProfessions] = useState<ProfessionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [profsLoading, setProfsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("equipement")
 
   useEffect(() => {
     ;(async () => {
@@ -73,9 +76,9 @@ export function ProfileView() {
 
   if (loading) {
     return (
-      <div className="grid gap-4 p-4 md:grid-cols-2">
-        <Skeleton className="h-48" />
-        <Skeleton className="h-48" />
+      <div className="grid gap-4 p-4 lg:grid-cols-[280px_1fr]">
+        <Skeleton className="h-[400px]" />
+        <Skeleton className="h-[400px]" />
       </div>
     )
   }
@@ -85,7 +88,9 @@ export function ProfileView() {
       <div className="flex h-full items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">Aucun personnage trouvé. Vérifie ta connexion Battle.net.</p>
+            <p className="text-muted-foreground">
+              Aucun personnage trouvé. Connecte-toi via Battle.net.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -93,116 +98,126 @@ export function ProfileView() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-auto p-3 sm:p-4 lg:flex-row">
-      {/* Character list */}
-      <Card className="shrink-0 lg:w-80">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Personnages ({characters.length})</CardTitle>
+    <div className="flex h-full flex-col gap-3 overflow-hidden p-2 sm:p-3 lg:flex-row lg:p-4">
+      {/* Liste des personnages */}
+      <Card className="shrink-0 lg:w-72 xl:w-80">
+        <CardHeader className="px-3 py-2 sm:px-4 sm:py-3">
+          <CardTitle className="text-xs sm:text-sm">
+            Personnages
+            <Badge variant="secondary" className="ml-2 text-[10px]">{characters.length}</Badge>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="max-h-[60vh] space-y-1 overflow-auto p-3 pt-0 lg:max-h-none">
-          {characters.slice(0, 20).map((c) => (
+        <CardContent className="max-h-[200px] space-y-0.5 overflow-auto px-2 pb-3 pt-0 lg:max-h-[calc(100vh-180px)]">
+          {characters.slice(0, 25).map((c) => (
             <button
               key={c.id}
               onClick={() => setSelectedChar(c)}
-              className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
+              className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors min-h-[44px] ${
                 selectedChar?.id === c.id
                   ? "bg-accent text-accent-foreground"
                   : "hover:bg-muted"
               }`}
             >
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{c.name}</div>
-                <div className="text-muted-foreground truncate text-xs">
-                  {c.playable_race?.name} {c.playable_class?.name}
+                <div className="truncate text-xs font-medium sm:text-sm">{c.name}</div>
+                <div className="text-muted-foreground truncate text-[10px] sm:text-xs">
+                  {c.playable_class?.name} · {c.realm?.name}
                 </div>
               </div>
               <Badge variant="outline" className="shrink-0 text-[10px]">
                 {c.level}
               </Badge>
+              {selectedChar?.id === c.id && (
+                <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+              )}
             </button>
           ))}
         </CardContent>
       </Card>
 
-      {/* Character detail + professions */}
-      <div className="min-w-0 flex-1 space-y-4">
+      {/* Fiche personnage */}
+      <div className="min-w-0 flex-1 overflow-auto">
         {selectedChar && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                {selectedChar.name}
-                <Badge variant="secondary" className="text-xs">
-                  {selectedChar.playable_class?.name}
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  Niv. {selectedChar.level}
-                </Badge>
-              </CardTitle>
-              <p className="text-muted-foreground text-xs">
-                {selectedChar.playable_race?.name} · {selectedChar.realm?.name} · {selectedChar.faction?.name}
-              </p>
-            </CardHeader>
-          </Card>
-        )}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
+            <TabsList className="h-9">
+              <TabsTrigger value="equipement" className="text-xs">Équipement</TabsTrigger>
+              <TabsTrigger value="professions" className="text-xs">Professions</TabsTrigger>
+            </TabsList>
 
-        {profsLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Skeleton className="h-40" />
-            <Skeleton className="h-40" />
-          </div>
-        ) : professions && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {professions.primaries.map((p) => (
-              <Card key={p.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <ScrollText className="h-4 w-4 text-amber-400" />
-                    {p.name}
-                    <Badge variant="outline" className="ml-auto text-[10px]">
-                      {p.recipes.length} recettes
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-48 overflow-auto">
-                  <ul className="space-y-0.5">
-                    {p.recipes.slice(0, 30).map((r) => (
-                      <li key={r.id} className="text-muted-foreground truncate text-xs">
-                        {r.name}
-                        <span className="text-muted-foreground/50 ml-1">({r.tier})</span>
-                      </li>
-                    ))}
-                    {p.recipes.length > 30 && (
-                      <li className="text-muted-foreground/60 text-xs">
-                        … +{p.recipes.length - 30} autres
-                      </li>
-                    )}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-            {professions.secondaries.map((p) => (
-              <Card key={p.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <ScrollText className="h-4 w-4 text-blue-400" />
-                    {p.name}
-                    <Badge variant="outline" className="ml-auto text-[10px]">
-                      {p.recipes.length} recettes
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-48 overflow-auto">
-                  <ul className="space-y-0.5">
-                    {p.recipes.slice(0, 20).map((r) => (
-                      <li key={r.id} className="text-muted-foreground truncate text-xs">
-                        {r.name}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+            <TabsContent value="equipement" className="mt-0">
+              <CharacterSheet
+                realm={selectedChar.realm.slug}
+                name={selectedChar.name}
+                className={selectedChar.playable_class?.name}
+                level={selectedChar.level}
+                race={selectedChar.playable_race?.name}
+                faction={selectedChar.faction?.name}
+              />
+            </TabsContent>
+
+            <TabsContent value="professions" className="mt-0">
+              {profsLoading ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-48" />
+                  <Skeleton className="h-48" />
+                </div>
+              ) : professions ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {professions.primaries.map((p) => (
+                    <Card key={p.id} className="overflow-hidden">
+                      <CardHeader className="bg-amber-500/5 pb-2 pt-3 px-4">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                          <ScrollText className="h-4 w-4 text-amber-400" />
+                          {p.name}
+                          <Badge variant="outline" className="ml-auto text-[10px]">
+                            {p.recipes.length} recettes
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="max-h-60 overflow-auto p-3">
+                        <ul className="space-y-0.5">
+                          {p.recipes.map((r) => (
+                            <li key={r.id} className="text-muted-foreground truncate text-xs">
+                              {r.name}
+                              <span className="text-muted-foreground/40 ml-1">({r.tier})</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {professions.secondaries.filter((p) => p.recipes.length > 0).map((p) => (
+                    <Card key={p.id}>
+                      <CardHeader className="bg-blue-500/5 pb-2 pt-3 px-4">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                          <ScrollText className="h-4 w-4 text-blue-400" />
+                          {p.name}
+                          <Badge variant="outline" className="ml-auto text-[10px]">
+                            {p.recipes.length}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="max-h-48 overflow-auto p-3">
+                        <ul className="space-y-0.5">
+                          {p.recipes.map((r) => (
+                            <li key={r.id} className="text-muted-foreground truncate text-xs">
+                              {r.name}
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-8 text-center">
+                    <p className="text-muted-foreground text-sm">Aucune profession trouvée.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>
