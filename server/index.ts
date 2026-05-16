@@ -7,6 +7,7 @@ import {
 } from "./storage"
 import { createAuthRoutes, initAuthSchema } from "./auth"
 import { createProfileRoutes } from "./profile"
+import { createOpportunitiesRoutes } from "./opportunities"
 
 /**
  * Azeroth Terminal — Blizzard Battle.net API proxy (SSE push, zero client polling)
@@ -600,6 +601,7 @@ const rawDb = storage.getDatabase()
 initAuthSchema(rawDb)
 app.route("/auth", createAuthRoutes(rawDb))
 app.route("/api/me", createProfileRoutes(rawDb))
+app.route("/api", createOpportunitiesRoutes(storage, rawDb))
 
 const realmCache = new Map<string, unknown>()
 const itemCache = new Map<string, CachedItem>()

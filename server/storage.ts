@@ -140,6 +140,24 @@ const MIGRATIONS: Migration[] = [
       `)
     },
   },
+  {
+    version: 3,
+    name: "add_alerts_table",
+    sql: `
+      CREATE TABLE IF NOT EXISTS alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL CHECK(type IN ('craft', 'flip', 'price')),
+        item_id INTEGER,
+        recipe_id INTEGER,
+        label TEXT NOT NULL,
+        threshold REAL NOT NULL,
+        direction TEXT NOT NULL CHECK(direction IN ('above', 'below')),
+        active INTEGER NOT NULL DEFAULT 1,
+        last_triggered_at INTEGER,
+        created_at INTEGER NOT NULL
+      );
+    `,
+  },
 ]
 
 class SqliteStorage implements StorageRepo {
