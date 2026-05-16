@@ -111,7 +111,7 @@ export function ProfileView() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground">
-              Aucun personnage trouvé. Connecte-toi via Battle.net.
+              Aucun personnage trouvé. Connecte-toi via le bouton Battle.net.
             </p>
           </CardContent>
         </Card>
@@ -163,7 +163,7 @@ export function ProfileView() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
             <TabsList className="h-9">
               <TabsTrigger value="equipement" className="text-xs">Équipement</TabsTrigger>
-              <TabsTrigger value="professions" className="text-xs">Professions</TabsTrigger>
+              <TabsTrigger value="professions" className="text-xs">Métiers</TabsTrigger>
             </TabsList>
 
             <TabsContent value="equipement" className="mt-0">
@@ -217,7 +217,10 @@ export function ProfileView() {
                         <CardTitle className="flex items-center gap-2 text-sm">
                           <ScrollText className="h-4 w-4 text-amber-400" />
                           {p.name}
-                          <Badge variant="outline" className="ml-auto text-[10px]">
+                          <Badge variant="secondary" className="ml-auto text-[10px]">
+                            Principale
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">
                             {p.recipes.length} recettes
                           </Badge>
                         </CardTitle>
@@ -227,7 +230,7 @@ export function ProfileView() {
                           {p.recipes.map((r) => (
                             <li key={r.id} className="text-muted-foreground truncate text-xs">
                               {r.name}
-                              <span className="text-muted-foreground/40 ml-1">({r.tier})</span>
+                              <span className="text-muted-foreground/40 ml-1">· {r.tier}</span>
                             </li>
                           ))}
                         </ul>
@@ -240,8 +243,11 @@ export function ProfileView() {
                         <CardTitle className="flex items-center gap-2 text-sm">
                           <ScrollText className="h-4 w-4 text-blue-400" />
                           {p.name}
-                          <Badge variant="outline" className="ml-auto text-[10px]">
-                            {p.recipes.length}
+                          <Badge variant="secondary" className="ml-auto text-[10px]">
+                            Secondaire
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            {p.recipes.length} recettes
                           </Badge>
                         </CardTitle>
                       </CardHeader>
@@ -250,6 +256,7 @@ export function ProfileView() {
                           {p.recipes.map((r) => (
                             <li key={r.id} className="text-muted-foreground truncate text-xs">
                               {r.name}
+                              <span className="text-muted-foreground/40 ml-1">· {r.tier}</span>
                             </li>
                           ))}
                         </ul>
