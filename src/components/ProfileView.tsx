@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
+import { useSearchParams } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Badge } from "./ui/badge"
 import { Skeleton } from "./ui/skeleton"
@@ -30,12 +31,22 @@ type ProfessionData = {
 }
 
 export function ProfileView() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [characters, setCharacters] = useState<Character[] | null>(null)
   const [selectedChar, setSelectedChar] = useState<Character | null>(null)
   const [professions, setProfessions] = useState<ProfessionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [profsLoading, setProfsLoading] = useState(false)
+  const [switching, setSwitching] = useState(false)
   const [activeTab, setActiveTab] = useState("equipement")
+
+  const selectChar = useCallback((char: Character) => {
+    setSwitching(true)
+    setSelectedChar(char)
+    setProfessions(null)
+    setSearchParams({ realm: char.realm.slug, char: char.name }, { replace: true })
+    setTimeout(() => setSwitching(false), 50)
+  }, [setSearchParams])
 
   useEffect(() => {
     ;(async () => {
@@ -44,8 +55,19 @@ export function ProfileView() {
         if (!res.ok) return
         const data = await res.json()
         setCharacters(data.characters)
-        if (data.characters?.length > 0) {
-          setSelectedChar(data.characters[0])
+
+        const urlRealm = searchParams.get("realm")
+        const urlChar = searchParams.get("char")
+        const match = urlRealm && urlChar
+          ? data.characters?.find((c: Character) =>
+              c.realm.slug === urlRealm && c.name.toLowerCase() === urlChar.toLowerCase()
+            )
+          : null
+
+        const initial = match ?? data.characters?.[0]
+        if (initial) {
+          setSelectedChar(initial)
+          setSearchParams({ realm: initial.realm.slug, char: initial.name }, { replace: true })
         }
       } catch {
         setCharacters([])
@@ -111,7 +133,7 @@ export function ProfileView() {
           {characters.slice(0, 25).map((c) => (
             <button
               key={c.id}
-              onClick={() => setSelectedChar(c)}
+              onClick={() => selectChar(c)}
               className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors min-h-[44px] ${
                 selectedChar?.id === c.id
                   ? "bg-accent text-accent-foreground"
@@ -145,18 +167,44 @@ export function ProfileView() {
             </TabsList>
 
             <TabsContent value="equipement" className="mt-0">
-              <CharacterSheet
-                realm={selectedChar.realm.slug}
-                name={selectedChar.name}
-                className={selectedChar.playable_class?.name}
-                level={selectedChar.level}
-                race={selectedChar.playable_race?.name}
-                faction={selectedChar.faction?.name}
-              />
+              {switching ? (
+                <div className="space-y-3 rounded-xl bg-gradient-to-b from-slate-900 via-slate-950 to-black p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-14 w-14 rounded-full bg-white/5" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-40 bg-white/5" />
+                      <Skeleton className="h-3 w-28 bg-white/5" />
+                    </div>
+                  </div>
+                  <div className="grid gap-3 lg:grid-cols-[1fr_200px_1fr]">
+                    <div className="space-y-2">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <Skeleton key={i} className="h-[52px] bg-white/5" />
+                      ))}
+                    </div>
+                    <Skeleton className="hidden h-[450px] bg-white/5 lg:block" />
+                    <div className="space-y-2">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <Skeleton key={i} className="h-[52px] bg-white/5" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <CharacterSheet
+                  key={`${selectedChar.realm.slug}-${selectedChar.name}`}
+                  realm={selectedChar.realm.slug}
+                  name={selectedChar.name}
+                  className={selectedChar.playable_class?.name}
+                  level={selectedChar.level}
+                  race={selectedChar.playable_race?.name}
+                  faction={selectedChar.faction?.name}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="professions" className="mt-0">
-              {profsLoading ? (
+              {profsLoading || switching ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Skeleton className="h-48" />
                   <Skeleton className="h-48" />
