@@ -12,8 +12,12 @@ type EquipItem = {
   quality: string
   quality_name: string
   ilvl: number
+  icon: string
   enchant: string | null
   gems: string[]
+  stats: Array<{ type: string; value: number }>
+  set_name: string | null
+  effects: string[]
 }
 
 type CharMedia = {
@@ -89,15 +93,21 @@ const SLOT_FR: Record<string, string> = {
   OFF_HAND: "Main gauche",
 }
 
+function triggerWowheadTooltips() {
+  if (typeof window !== "undefined" && (window as unknown as Record<string, unknown>).$WowheadPower) {
+    ;((window as unknown as Record<string, unknown>).$WowheadPower as { refreshLinks?: () => void }).refreshLinks?.()
+  }
+}
+
 function GearSlot({ item, slot, side }: { item?: EquipItem; slot: string; side: "left" | "right" | "bottom" }) {
   const label = SLOT_FR[slot] ?? slot
   const isRight = side === "right"
 
   if (!item) {
     return (
-      <div className={`flex items-center gap-2 min-h-[48px] rounded border border-dashed border-white/10 bg-black/30 px-2 py-1 ${isRight ? "flex-row-reverse text-right" : ""}`}>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-white/10 bg-black/50">
-          <span className="text-[9px] text-white/20">—</span>
+      <div className={`flex items-center gap-2 min-h-[52px] rounded border border-dashed border-white/10 bg-black/30 px-2 py-1.5 ${isRight ? "flex-row-reverse text-right" : ""}`}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-white/10 bg-black/50">
+          <SlotIcon slot={slot} />
         </div>
         <span className="text-[10px] text-white/30">{label}</span>
       </div>
@@ -106,13 +116,32 @@ function GearSlot({ item, slot, side }: { item?: EquipItem; slot: string; side: 
 
   const bg = QUALITY_BG[item.quality] ?? QUALITY_BG.COMMON
   const textColor = QUALITY_TEXT[item.quality] ?? "text-white"
+  const wowheadUrl = `https://www.wowhead.com/fr/item=${item.id}`
 
   return (
-    <div
-      className={`group relative flex items-center gap-2 min-h-[48px] rounded border bg-gradient-to-r px-2 py-1 transition-all hover:scale-[1.02] hover:shadow-lg ${bg} ${isRight ? "flex-row-reverse text-right" : ""}`}
+    <a
+      href={wowheadUrl}
+      data-wowhead={`item=${item.id}&domain=fr`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`group relative flex items-center gap-2 min-h-[52px] rounded border bg-gradient-to-r px-2 py-1.5 transition-all hover:scale-[1.02] hover:shadow-lg hover:brightness-110 no-underline ${bg} ${isRight ? "flex-row-reverse text-right" : ""}`}
+      onMouseEnter={triggerWowheadTooltips}
     >
-      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded border bg-black/60 font-mono text-[11px] font-bold text-white ${bg.includes("border") ? "" : "border-white/20"}`}>
-        {item.ilvl}
+      <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded border bg-black/60 ${bg.includes("border") ? "" : "border-white/20"}`}>
+        <img
+          src={`https://wow.zamimg.com/images/wow/icons/medium/${item.id}.jpg`}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={(e) => {
+            const target = e.currentTarget
+            target.style.display = "none"
+            target.parentElement!.querySelector(".fallback")?.classList.remove("hidden")
+          }}
+        />
+        <span className="fallback hidden font-mono text-[10px] font-bold text-white">{item.ilvl}</span>
+        <div className="absolute bottom-0 right-0 rounded-tl bg-black/80 px-0.5 text-[8px] font-bold text-white">
+          {item.ilvl}
+        </div>
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[9px] uppercase tracking-wider text-white/40">{label}</div>
@@ -120,14 +149,25 @@ function GearSlot({ item, slot, side }: { item?: EquipItem; slot: string; side: 
           {item.name}
         </div>
         {item.enchant && (
-          <div className="truncate text-[9px] text-emerald-400">{item.enchant}</div>
+          <div className="truncate text-[9px] text-emerald-400">⚡ {item.enchant}</div>
         )}
         {item.gems.length > 0 && (
-          <div className="truncate text-[9px] text-sky-300">{item.gems.join(", ")}</div>
+          <div className="truncate text-[9px] text-sky-300">💎 {item.gems.join(", ")}</div>
         )}
       </div>
-    </div>
+    </a>
   )
+}
+
+function SlotIcon({ slot }: { slot: string }) {
+  const icons: Record<string, string> = {
+    HEAD: "👤", NECK: "📿", SHOULDER: "🦽", BACK: "🧣",
+    CHEST: "👕", SHIRT: "👔", TABARD: "🎽", WRIST: "⌚",
+    HANDS: "🧤", WAIST: "🥋", LEGS: "👖", FEET: "👢",
+    FINGER_1: "💍", FINGER_2: "💍", TRINKET_1: "🔮", TRINKET_2: "🔮",
+    MAIN_HAND: "⚔️", OFF_HAND: "🛡️",
+  }
+  return <span className="text-base opacity-20">{icons[slot] ?? "·"}</span>
 }
 
 export function CharacterSheet({
@@ -166,6 +206,12 @@ export function CharacterSheet({
       setStats(st)
     }).finally(() => setLoading(false))
   }, [charPath])
+
+  useEffect(() => {
+    if (equipment.length > 0) {
+      setTimeout(triggerWowheadTooltips, 300)
+    }
+  }, [equipment])
 
   const bySlot = new Map(equipment.map((i) => [i.slot_type, i]))
   const gearItems = equipment.filter((i) => !["SHIRT", "TABARD"].includes(i.slot_type))

@@ -145,12 +145,16 @@ export function createProfileRoutes(db: Database) {
     )) as {
       equipped_items?: Array<{
         slot: { type: string; name: string }
-        item: { id: number }
+        item: { id: number; media?: { key?: { href: string } } }
         name: string
         quality: { type: string; name: string }
         level: { value: number }
-        enchantments?: Array<{ display_string: string }>
-        sockets?: Array<{ item?: { name: string }; display_string?: string }>
+        media?: { id: number; key?: { href: string } }
+        enchantments?: Array<{ display_string: string; enchantment_id?: number }>
+        sockets?: Array<{ item?: { id: number; name: string }; display_string?: string }>
+        set?: { item_set: { name: string } }
+        stats?: Array<{ type: { type: string; name: string }; value: number }>
+        spells?: Array<{ description: string }>
       }>
     }
 
@@ -163,8 +167,12 @@ export function createProfileRoutes(db: Database) {
         quality: i.quality.type,
         quality_name: i.quality.name,
         ilvl: i.level.value,
+        icon: `https://wow.zamimg.com/images/wow/icons/large/${i.item.id}.jpg`,
         enchant: i.enchantments?.[0]?.display_string ?? null,
         gems: i.sockets?.map((s) => s.item?.name ?? s.display_string).filter(Boolean) ?? [],
+        stats: i.stats?.map((s) => ({ type: s.type.name, value: s.value })) ?? [],
+        set_name: i.set?.item_set?.name ?? null,
+        effects: i.spells?.map((s) => s.description) ?? [],
       })),
     })
   })
