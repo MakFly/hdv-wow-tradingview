@@ -4,6 +4,8 @@ import {
   type Region,
   createStorage,
 } from "./storage"
+import { createAuthRoutes, initAuthSchema } from "./auth"
+import { createProfileRoutes } from "./profile"
 
 /**
  * Azeroth Terminal — Blizzard Battle.net API proxy (SSE push, zero client polling)
@@ -589,6 +591,12 @@ if (CLIENT_ID && CLIENT_SECRET) {
 // --------------------------- HTTP server ----------------------------------
 
 const app = new Hono()
+
+// --- Profile OAuth + routes ---
+const rawDb = storage.getDatabase()
+initAuthSchema(rawDb)
+app.route("/auth", createAuthRoutes(rawDb))
+app.route("/api/me", createProfileRoutes(rawDb))
 
 const realmCache = new Map<string, unknown>()
 const itemCache = new Map<string, CachedItem>()

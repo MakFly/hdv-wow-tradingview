@@ -20,6 +20,7 @@ type AhMeta = { lastModified: string | null; fetchedAt: number }
 export interface StorageRepo {
   init(): void
   close(): void
+  getDatabase(): import("bun:sqlite").Database
   getTokens(region: Region): TokenPoint[]
   appendTokenPoint(region: Region, point: TokenPoint): boolean
   getAhHistory(region: Region, crId: number | null, itemId: number): ItemSnapshot[]
@@ -261,6 +262,10 @@ class SqliteStorage implements StorageRepo {
         throw e
       }
     }
+  }
+
+  getDatabase() {
+    return this.db
   }
 
   close() {
