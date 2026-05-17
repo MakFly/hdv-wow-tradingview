@@ -75,7 +75,7 @@ export function OpportunitiesView() {
     ;(async () => {
       try {
         const res = await fetch(
-          `${API}/api/me/professions?region=eu&realm=${selectedChar.realm.slug}&char=${selectedChar.name}`
+          `${API}/api/me/character/${selectedChar.realm.slug}/${encodeURIComponent(selectedChar.name.toLowerCase())}/professions?region=eu`
         )
         if (!res.ok) return
         const data = await res.json()

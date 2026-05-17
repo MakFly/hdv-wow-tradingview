@@ -31,7 +31,9 @@ export type CraftOpportunity = {
 
 function fmtGold(gold: number): string {
   if (!isFinite(gold)) return "—"
-  return gold.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + "g"
+  if (gold < 1) return (gold * 100).toFixed(0) + "a"
+  if (gold < 100) return gold.toFixed(1) + "g"
+  return Math.round(gold).toLocaleString("fr-FR") + "g"
 }
 
 type SortKey = "recipe_name" | "crafted_item_name" | "craft_cost" | "sell_price" | "profit" | "margin"

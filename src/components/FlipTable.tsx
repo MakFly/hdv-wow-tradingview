@@ -21,7 +21,9 @@ export type FlipOpportunity = {
 
 function fmtGold(gold: number): string {
   if (!isFinite(gold)) return "—"
-  return gold.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + "g"
+  if (gold < 1) return (gold * 100).toFixed(0) + "a"
+  if (gold < 100) return gold.toFixed(1) + "g"
+  return Math.round(gold).toLocaleString("fr-FR") + "g"
 }
 
 type SortKey = "item_name" | "current_price" | "median_price" | "profit_potential" | "margin"
