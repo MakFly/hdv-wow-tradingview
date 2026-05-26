@@ -1,23 +1,12 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
 node_modules
 dist
 dist-ssr
 *.local
 
-# Environment files (secrets) — keep .env.example tracked
-.env
-.env.*
+# Environment files
 !.env.example
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -28,8 +17,29 @@ dist-ssr
 *.sln
 *.sw?
 
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
 # instant-grep index
 .ig/
 
-# Local data (auction-house history, sqlite db, token history)
+# Local data
 .data/
+data/
+
+# Images (session debris)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Playwright
+.playwright-mcp/
+config.bat

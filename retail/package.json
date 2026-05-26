@@ -1,0 +1,20 @@
+{
+  "name": "wow-knowledge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cli": "bun run src/cli.ts",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "@types/turndown": "^5.0.5",
+    "typescript": "^5.7.0",
+    "playwright": "^1.50.0"
+  }
+}
